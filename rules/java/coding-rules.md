@@ -1,6 +1,6 @@
 # Java 编码规范
 
-> always-apply.md 是 5 条铁律，本文件是展开细则。两者共同构成完整编码标准。
+> always-apply.md 是 7 条铁律，本文件是展开细则。两者共同构成完整编码标准。
 
 ## 总则
 
@@ -146,15 +146,13 @@ com.example.{module}/
 
 ## 十四、禁止项速查
 
-> 仅列出 always-apply.md 5 条铁律之外的禁止项。
+> 仅列出 always-apply.md 7 条铁律之外的禁止项。
 
 | 禁止 | 替代方案 |
 |------|----------|
 | 空 catch 块 | 至少 `log.warn()` + 注释说明 |
-| 魔法字符串 / 魔数 | Enum / 常量 |
 | `example` 包名 | 删除或用实际包名 |
 | XML 中 `${}` 拼接 SQL | `#{}` |
-| 硬编码路径/密钥 | 配置文件 + 环境变量 |
 | JUnit 原生断言 | AssertJ `assertThat` |
 | 传统 switch 穿透 | 增强 `switch` 表达式 |
 | 先 instanceof 再强转 | `instanceof` 模式匹配 |

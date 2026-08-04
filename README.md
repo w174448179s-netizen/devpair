@@ -58,7 +58,7 @@ DevPair 不是知识库，不是 Wiki，不是第二大脑。
 │
 ├── rules/                                  # 开发规则
 │   ├── core/
-│   │   └── always-apply.md                 # 5 条核心铁律（每个 task 必加载）
+│   │   └── always-apply.md                 # 7 条核心铁律（每个 task 必加载）
 │   ├── java/
 │   │   ├── coding-rules.md                 # Java 编码规范（阿里规约 + 项目扩展）
 │   │   └── object-convert-rules.md         # 对象分层与 MapStruct 转换规范
@@ -101,7 +101,7 @@ your-project/
 
 | 层级 | 文件 | 定位 |
 |------|------|------|
-| 铁律 | `rules/core/always-apply.md` | 5 条不可违反的底线，每个 task 必加载 |
+| 铁律 | `rules/core/always-apply.md` | 7 条不可违反的底线，每个 task 必加载 |
 | 细则 | `rules/java/coding-rules.md` | 铁律的展开 + 阿里规约关键点 + 14 章扩展规则 |
 | 细则 | `rules/java/object-convert-rules.md` | MapStruct Convert 使用规范，补充 coding-rules.md 第二章 |
 | 细则 | `rules/testing/testing-rules.md` | 单元测试 + 集成测试规范 |

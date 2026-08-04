@@ -8,13 +8,15 @@
 - 技术栈：Java 17 + Spring Boot 3 + LangChain4j + PgVector + Ollama
 - AI 工具：智谱AI glm-4.5-air（优先）/ DeepSeek（备用）/ Claude
 
-## 核心约束（永远生效，5 条）
+## 核心约束（永远生效，7 条）
 
 1. Controller 只做参数校验和路由，不写业务逻辑。业务逻辑一律在 Service 层。
 2. 异常统一用 @RestControllerAdvice 全局处理。禁止在 Controller 或 Service 中 try-catch 后手动包装返回值。
 3. 所有 public 方法必须有 Javadoc 注释（功能说明、@param、@return）。
 4. 使用 Lombok（@Data、@RequiredArgsConstructor），不手写 getter/setter/constructor。
 5. 返回前端的数据必须用 DTO/VO，禁止直接返回 Entity。
+6. 禁止魔数和魔法字符串，必须用枚举或常量。
+7. 禁止硬编码路径、URL、密钥，必须通过配置文件管理。
 
 ## 技术偏好
 
@@ -44,7 +46,7 @@
 
 - 所有回答使用中文
 - 代码注释用中文
-- 代码生成后自检是否符合上述 5 条核心约束
+- 代码生成后自检是否符合上述 7 条核心约束
 - 不要过度解释，直接做事
 
 ## 工作方式
