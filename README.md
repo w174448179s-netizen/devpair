@@ -65,7 +65,8 @@ DevPair 不是知识库，不是 Wiki，不是第二大脑。
 │   ├── testing/
 │   │   └── testing-rules.md                # 单元测试 + 集成测试规范
 │   ├── components/
-│   │   └── rag-vector.md                   # RAG 向量检索规范
+│   │   ├── rag-vector.md                   # RAG 向量检索规范
+│   │   └── langchain4j.md                  # LangChain4j AI Services 规范
 │   └── output/                             # JSON 输出格式规范（待填充）
 │
 ├── decisions/                              # 技术决策记录（待填充）
@@ -73,7 +74,8 @@ DevPair 不是知识库，不是 Wiki，不是第二大脑。
 ├── notes/                                  # 踩坑记录
 │   └── pitfalls/
 │       ├── spring-ai.md                    # ChatClient 连接池问题
-│       └── agent-design.md                 # Agent 工具接口过度设计
+│       ├── agent-design.md                 # Agent 工具接口过度设计
+│       └── pgvector.md                     # PgVector 配置踩坑
 │
 ├── templates/                              # 任务模板（待填充）
 │
@@ -106,6 +108,7 @@ your-project/
 | 细则 | `rules/java/object-convert-rules.md` | MapStruct Convert 使用规范，补充 coding-rules.md 第二章 |
 | 细则 | `rules/testing/testing-rules.md` | 单元测试 + 集成测试规范 |
 | 组件 | `rules/components/rag-vector.md` | RAG 向量检索组件规范 |
+| 组件 | `rules/components/langchain4j.md` | LangChain4j AI Services + 多模型配置规范 |
 
 **规则之间的关系**：always-apply.md 是"是什么"（铁律），coding-rules.md 是"怎么做"（细则），其他文件按需加载。
 
