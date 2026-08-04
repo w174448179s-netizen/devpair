@@ -53,21 +53,60 @@ public class ModelConfig {
 
 ## 二、AI Service 声明式接口
 
-### 核心原则：prompt 用注解管理，禁止 Java 代码拼接字符串
+### 核心原则：prompt 外部化，禁止写死在代码或注解中
+
+prompt 是业务配置，必须与代码分离。按长度选方案：
+
+| prompt 类型 | 存放位置 | 加载方式 |
+|------------|---------|---------|
+| 短 prompt（< 200 字） | `application.yml` | `@ConfigurationProperties` 注入 |
+| 长 prompt / 模板（≥ 200 字） | `src/main/resources/prompts/*.txt` | `@SystemMessage(fromResource = "...")` |
+
+```yaml
+# application.yml
+ai:
+  prompts:
+    summary-system: "你是一个文本摘要助手，将输入文本压缩为 200 字以内的摘要。"
+    extract-system: "从文本中提取实体信息，返回 JSON 格式。"
+```
 
 ```java
-// 正确：注解声明 prompt
+// 正确：短 prompt 从配置注入
 @AiService
 public interface SummaryService {
 
-    @SystemMessage("你是一个文本摘要助手，将输入文本压缩为 200 字以内的摘要。")
+    @SystemMessage("#{summary-system}")
     String summarize(@UserMessage String text);
 }
 
-// 禁止：Java 代码拼接 prompt
+// 正确：长 prompt 从资源文件加载
+@AiService
+public interface EntityExtractService {
+
+    @SystemMessage(fromResource = "prompts/extract-system.txt")
+    EntityExtractResult extract(@UserMessage String text);
+}
+
+// 禁止：prompt 写死在注解里
+@SystemMessage("你是一个文本摘要助手，将输入文本压缩为 200 字以内的摘要。")
+
+// 禁止：Java 代码拼接 prompt 字符串
 String prompt = "你是一个摘要助手，请总结以下文本：" + text;
 chatModel.generate(prompt);
 ```
+
+### 资源文件组织
+
+```
+src/main/resources/
+└── prompts/
+    ├── summary-system.txt       # 摘要系统提示词
+    ├── extract-system.txt       # 实体抽取系统提示词
+    └── chat-system.txt          # 对话系统提示词
+```
+
+- 每个 AI Service 接口对应一个 prompt 资源文件，按场景命名
+- prompt 文件用纯文本，支持 `{{变量名}}` 占位符（LangChain4j 模板语法）
 
 ### 多模型时用 @Qualifier 指定
 
@@ -109,11 +148,11 @@ com.example.ai/
 返回类型直接用 POJO 或 Enum，框架自动反序列化，禁止手动解析 JSON。
 
 ```java
-// 正确：返回类型即结构化结果
+// 正确：返回类型即结构化结果，prompt 从资源文件加载
 @AiService
 public interface EntityExtractService {
 
-    @SystemMessage("从文本中提取实体信息，返回 JSON 格式。")
+    @SystemMessage(fromResource = "prompts/extract-system.txt")
     EntityExtractResult extract(@UserMessage String text);
 }
 
@@ -164,7 +203,8 @@ JSONObject json = new JSONObject(response);  // 禁止手动解析
 | 禁止 | 替代方案 |
 |------|----------|
 | 方法内 `new ChatLanguageModel` | `@Bean` 单例注入 |
-| Java 代码拼接 prompt 字符串 | `@SystemMessage` / `@UserMessage` 注解 |
+| prompt 写死在注解或代码中 | 外部化到 `application.yml` 或 `resources/prompts/*.txt` |
+| Java 代码拼接 prompt 字符串 | prompt 模板 + `{{变量}}` 占位符 |
 | 手动解析 AI 返回 JSON | Structured Output（返回 POJO/Enum） |
 | 一个 AI Service 接口塞多种用途 | 按场景拆分独立接口 |
 | 运行时动态切换模型 | 多套 AI Service 接口，Service 层选择 |
