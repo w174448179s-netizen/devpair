@@ -101,7 +101,7 @@ Task03（{模块名}） ← 依赖 Task01、Task02
 
 ## 需加载的规则文件（执行前必须逐一读取）
 - ~/devpair/rules/core/always-apply.md
-- ~/devpair/rules/java/code-style.md
+- ~/devpair/rules/java/coding-rules.md
 - {其他与本任务相关的规则文件，精确列出，不要多也不要少}
 
 ## 交付物清单
