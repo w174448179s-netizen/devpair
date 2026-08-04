@@ -104,11 +104,8 @@ Task03（{模块名}） ← 依赖 Task01、Task02
 - ~/devpair/rules/java/coding-rules.md
 - {其他与本任务相关的规则文件，精确列出，不要多也不要少}
 
-## 参考文档（架构设计中的细节，执行前读取）
-- {架构文档路径，如：./architecture.md}
-- {API 设计文档，如：./docs/api-design.md}
-- {数据库设计，如：./docs/db-schema.md}
-- {如果任务目标已足够清晰，删除本节}
+## 参考文档（架构设计细节，执行前读取）
+{列出本 task 直接相关的架构文档路径。内容可能包括：接口定义、数据库表结构、数据流图、业务规则等。如果任务目标已足够清晰，删除本节}
 
 ## 交付物清单
 1. {具体的文件路径/类名，如：src/main/java/.../DocumentController.java}
