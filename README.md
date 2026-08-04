@@ -156,31 +156,90 @@ your-project/
 
 ---
 
-## 三条 AI 指令
+## 对话模板
 
-### 指令 1：拆分架构，生成 tasks
+复制即用，每条模板列出该场景需要引入的规则文件。
 
-```
-读取 ~/devpair/commands/split-tasks.md，按指令执行
-```
+### 工作流指令
 
-AI 会基于架构方案在 `./tasks/` 目录生成整套开发文档。
+| 场景 | 对话模板 | 引入的文件 |
+|------|---------|-----------|
+| 拆分架构 | `读取 ~/devpair/commands/split-tasks.md，按指令执行` | split-tasks.md |
+| 执行任务 | `读取 ./tasks/task-xx.md，按文档要求执行` | task 文档中列出的规则文件 |
+| 知识沉淀 | `读取 ~/devpair/commands/capture-knowledge.md，按指令执行` | capture-knowledge.md |
 
-### 指令 2：执行单个子任务
+### 按需场景指令
 
-```
-读取 ./tasks/task-02-xxx.md，按文档要求执行
-```
-
-AI 会读取 task 文档、加载规则文件、编写代码并自检。
-
-### 指令 3：知识沉淀
+**架构讨论**
 
 ```
-读取 ~/devpair/commands/capture-knowledge.md，按指令执行
+读取 ~/devpair/AGENTS.md，跟我讨论以下架构方案
 ```
 
-AI 会梳理开发过程中的踩坑和经验，更新规则文件或踩坑记录。
+引入：`AGENTS.md`（个人偏好、7 条铁律、技术栈、决策原则）
+
+**代码审查**
+
+```
+读取以下文件，审查我贴的代码：
+- ~/devpair/rules/core/always-apply.md
+- ~/devpair/rules/java/coding-rules.md
+- ~/devpair/rules/java/object-convert-rules.md
+```
+
+引入：`always-apply.md` + `coding-rules.md` + `object-convert-rules.md`
+
+**Bug 修复**
+
+```
+读取以下文件，帮我修复 Bug：
+- ~/devpair/rules/core/always-apply.md
+- ~/devpair/rules/java/coding-rules.md
+Bug 描述：[描述问题]
+```
+
+引入：`always-apply.md` + `coding-rules.md`（修复代码也要符合规范）
+
+**编写测试**
+
+```
+读取以下文件，为以下代码编写单元测试：
+- ~/devpair/rules/core/always-apply.md
+- ~/devpair/rules/testing/testing-rules.md
+```
+
+引入：`always-apply.md` + `testing-rules.md`
+
+**AI 功能开发（LangChain4j）**
+
+```
+读取以下文件，帮我开发 AI 功能：
+- ~/devpair/rules/core/always-apply.md
+- ~/devpair/rules/java/coding-rules.md
+- ~/devpair/rules/components/langchain4j.md
+功能需求：[描述需求]
+```
+
+引入：`always-apply.md` + `coding-rules.md` + `langchain4j.md`
+
+**RAG 检索开发**
+
+```
+读取以下文件，帮我开发 RAG 检索功能：
+- ~/devpair/rules/core/always-apply.md
+- ~/devpair/rules/components/rag-vector.md
+- ~/devpair/rules/components/langchain4j.md
+```
+
+引入：`always-apply.md` + `rag-vector.md` + `langchain4j.md`
+
+**查询踩坑记录**
+
+```
+读取 ~/devpair/notes/pitfalls/ 下的文件，检查我当前方案是否有已知坑
+```
+
+引入：`notes/pitfalls/` 目录下所有踩坑记录
 
 ---
 
