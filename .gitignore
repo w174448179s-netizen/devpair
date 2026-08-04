@@ -1,7 +1,33 @@
-# macOS
-.DS_Store
+
 
 # WorkBuddy
 .workbuddy/
 
+### IntelliJ IDEA ###
 .idea/
+*.iws
+*.iml
+*.ipr
+
+# ---------------- 系统生成文件 ----------------
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# ---------------- 临时/备份文件 ----------------
+*.tmp
+*.bak
+*.swp
+*.swo
+~$*
+
+# ---------------- Git 嵌套冲突清理 ----------------
+*/.git
+*/.gitignore
+*/.gitmodules

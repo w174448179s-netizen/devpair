@@ -56,19 +56,24 @@ DevPair 不是知识库，不是 Wiki，不是第二大脑。
 │   ├── execute-task.md                     # 执行单个子任务开发
 │   └── capture-knowledge.md                # 开发完成 → 知识沉淀
 │
-├── rules/                                  # 通用开发规则
+├── rules/                                  # 开发规则
 │   ├── core/
-│   │   └── always-apply.md                 # 5 条核心强制规则
-│   ├── java/                               # Java 代码规范（待填充）
-│   ├── testing/                            # 单元测试规范（待填充）
+│   │   └── always-apply.md                 # 5 条核心铁律（每个 task 必加载）
+│   ├── java/
+│   │   ├── coding-rules.md                 # Java 编码规范（阿里规约 + 项目扩展）
+│   │   └── object-convert-rules.md         # 对象分层与 MapStruct 转换规范
+│   ├── testing/
+│   │   └── testing-rules.md                # 单元测试 + 集成测试规范
 │   ├── components/
 │   │   └── rag-vector.md                   # RAG 向量检索规范
 │   └── output/                             # JSON 输出格式规范（待填充）
 │
 ├── decisions/                              # 技术决策记录（待填充）
 │
-├── notes/                                  # 学习笔记 + 踩坑记录
-│   └── pitfalls/                           # 踩坑记录（待填充）
+├── notes/                                  # 踩坑记录
+│   └── pitfalls/
+│       ├── spring-ai.md                    # ChatClient 连接池问题
+│       └── agent-design.md                 # Agent 工具接口过度设计
 │
 ├── templates/                              # 任务模板（待填充）
 │
@@ -87,6 +92,22 @@ your-project/
 │
 └── src/                                    # 项目源码
 ```
+
+---
+
+## 规则体系
+
+规则分两层，互为补充，零重复：
+
+| 层级 | 文件 | 定位 |
+|------|------|------|
+| 铁律 | `rules/core/always-apply.md` | 5 条不可违反的底线，每个 task 必加载 |
+| 细则 | `rules/java/coding-rules.md` | 铁律的展开 + 阿里规约关键点 + 14 章扩展规则 |
+| 细则 | `rules/java/object-convert-rules.md` | MapStruct Convert 使用规范，补充 coding-rules.md 第二章 |
+| 细则 | `rules/testing/testing-rules.md` | 单元测试 + 集成测试规范 |
+| 组件 | `rules/components/rag-vector.md` | RAG 向量检索组件规范 |
+
+**规则之间的关系**：always-apply.md 是"是什么"（铁律），coding-rules.md 是"怎么做"（细则），其他文件按需加载。
 
 ---
 
@@ -169,15 +190,6 @@ AI 会梳理开发过程中的踩坑和经验，更新规则文件或踩坑记�
 | 新学了一个技术 | 在 `notes/` 下写笔记 |
 | 做了一个重要决策 | 在 `decisions/` 下新建文件 |
 | 某条规则在多个项目重复出现 | 提取到 `rules/` |
-
----
-
-## 技术栈
-
-- Java 17 + Spring Boot 3 + LangChain4j 1.17.2 + PgVector + Ollama
-- 优先简洁方案，不过度设计
-- 一个类只做一件事，单一职责优先
-- 先跑通再优化，不要追求一步到位
 
 ---
 
