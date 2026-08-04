@@ -36,6 +36,7 @@
 | Convert | `{实体名}Convert` | MapStruct 转换器 |
 
 - DO 不加后缀，DTO/Req/VO 必须加后缀
+- DTO 使用 `@Builder` 模式，禁止 setter 链
 - 对象转换统一用 MapStruct，禁止 `BeanUtils.copyProperties()` 等反射拷贝
 
 ## 三、状态管理
@@ -78,14 +79,22 @@ com.example.{module}/
 - DB snake_case → Java camelCase（MyBatis 自动映射）
 - XML 中 namespace = Mapper 接口全路径
 - 禁止 XML 中 `${}` 拼接 SQL，查询参数一律 `#{}`
+- 数据库连接池必须有超时配置
 
 ## 八、配置管理
 
 - 禁止硬编码路径、URL、密钥
 - 敏感信息通过环境变量注入
 - 业务配置统一前缀，通过 `@ConfigurationProperties` 读取
+- `application.yml` 必须有密码配置（即使为空也要占位）
+- 日志级别不能是 DEBUG
 
-## 九、注释规范
+## 九、Web 安全
+
+- CORS 必须限制来源，禁止 `allowAllOrigins`
+- HTTP 客户端通过 `@Bean` 单例注入，禁止方法内 `new`
+
+## 十、注释规范
 
 - 所有 private 方法必须有注释，说明职责、参数含义、返回值
 - 每次调用 private 方法前必须有一行注释说明调用意图
@@ -93,21 +102,21 @@ com.example.{module}/
 - 复杂判断（超过 2 个条件）、正则、非显而易见的业务规则，必须加行内注释
 - getter/setter（Lombok 生成）、简单注入声明、一目了然的赋值不需要注释
 
-## 十、方法规范
+## 十一、方法规范
 
 - 入参必须做 null 和边界检查
 - 单方法不超过 30 行，单一职责
 - 禁止魔数，用常量或枚举
 - `if`/`for`/`while` 必须用花括号
 
-## 十一、Import 规范
+## 十二、Import 规范
 
 - 禁止通配符 `import xxx.*`
 - 删除代码时必须同步删除已不再使用的 import 语句
 - 禁止保留仅用于注释代码的 import
 - 生成或修改代码完成后，确保无 unused import 警告
 
-## 十二、禁止项速查
+## 十三、禁止项速查
 
 > 仅列出 always-apply.md 5 条铁律之外的禁止项。
 
@@ -129,3 +138,7 @@ com.example.{module}/
 | `BeanUtils.copyProperties()` | MapStruct Convert |
 | `Date` / `SimpleDateFormat` | `LocalDateTime` |
 | `System.out` / `e.printStackTrace()` | SLF4J @Slf4j |
+| CORS `allowAllOrigins` | 限制具体来源 |
+| 方法内 `new` HTTP 客户端 | `@Bean` 单例注入 |
+| DTO setter 链 | `@Builder` 模式 |
+| 日志级别 DEBUG | INFO 或以上 |
