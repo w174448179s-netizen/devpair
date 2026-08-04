@@ -1,19 +1,14 @@
----
-alwaysApply: true
-description: "brain-pipeline 项目核心编码规范，生成任何 Java 代码时自动生效"
----
+# Java 编码规范
 
-# 编码规范（AI 系统指令）
-
-你是一位遵循以下规范的资深 Java 后端工程师。生成代码前先列出将遵守的规范要点，再生成代码。
+> always-apply.md 的 5 条铁律在此文件中展开细化。两者不冲突，互为补充。
 
 ## 总则
 
-1. 代码基准规范：严格执行《阿里巴巴Java开发手册（泰山版）》全部强制条款；
-2. 本文件后续所有规则为项目扩展/修正规则，**当与阿里规约冲突时，以本项目规则为准**；
-3. 生成、修改、重构 Java 代码均不得违反上述两套规范。
+1. 代码基准规范：严格执行《阿里巴巴Java开发手册（泰山版）》全部强制条款
+2. 本文件为项目扩展规则，**当与阿里规约冲突时，以本文件为准**
+3. 生成、修改、重构 Java 代码均不得违反上述两套规范
 
-### 阿里规约关键强制点（AI 自动遵守）
+### 阿里规约关键强制点
 
 1. 命名：包全小写、类大驼峰、方法小驼峰、常量全大写下划线；布尔变量 is/has 开头
 2. 空指针防护：所有对象调用前判空，集合返回空集合而非 null，字符串用 hasText()
@@ -26,25 +21,21 @@ description: "brain-pipeline 项目核心编码规范，生成任何 Java 代码
 
 ---
 
-## 一、包结构与命名
+## 一、命名规范
 
-- 基础包：`com.ws.brain`
-- 子包：`importer`、`pipeline`、`ai`、`candidate`、`knowledge`、`obsidian`、`repository`、`enums`、`convert`
-- `repository` 下分 `entity`、`mapper`
-- 每个业务模块包下如有 Service 实现类，必须放在 `impl/` 子包中
 - 类名用英文，注释用中文
-- 禁止 `example` 目录或包
 - 禁止缩写命名，必须完整语义（如 `conversationMessage` 而非 `convMsg`）
+- 禁止 `example` 目录或包
 
-## 二、实体类分层与命名
+## 二、实体类分层
 
-| 层 | 包路径 | 命名规则 | V1 状态 |
-|---|---|---|---|
-| DO | `com.ws.brain.repository.entity` | `{表名驼峰}`，不加 DO 后缀 | ✅ |
-| DTO | `com.ws.brain.dto` | `{业务含义}DTO` | ✅ |
-| Req | `com.ws.brain.controller.req` | `{动作}{对象}Req` | ⏳ V2 |
-| VO | `com.ws.brain.controller.vo` | `{对象}VO` | ⏳ V2 |
-| Convert | `com.ws.brain.convert` | `{实体名}Convert` | ✅ |
+| 层 | 命名规则 | 说明 |
+|---|---|---|
+| DO | `{表名驼峰}`，不加后缀 | 对应数据库表，不暴露给外部 |
+| DTO | `{业务含义}DTO` | Service 间传递，按业务场景聚合 |
+| Req | `{动作}{对象}Req` | 接口入参 |
+| VO | `{对象}VO` | 接口出参 |
+| Convert | `{实体名}Convert` | MapStruct 转换器 |
 
 规则：
 - DO 不加后缀，DTO/Req/VO 必须加后缀
@@ -61,9 +52,8 @@ description: "brain-pipeline 项目核心编码规范，生成任何 Java 代码
 - 禁止在枚举中注入 Bean、访问 DB、调用网络、实现业务流程
 - Entity 状态字段直接用枚举类型，MyBatis 通过 `defaultEnumTypeHandler` 自动转换
 
-## 四、JDK 特性
+## 四、JDK 17 特性
 
-- 项目基线：JDK 17
 - 状态流转/策略选择：增强 `switch` 表达式，禁止传统 switch 穿透
 - 类型判断+转换：`instanceof` 模式匹配，禁止先判断再强转
 - 多行文本：Text Blocks `"""`，禁止字符串拼接
@@ -73,10 +63,10 @@ description: "brain-pipeline 项目核心编码规范，生成任何 Java 代码
 
 每个 Service 必须有接口 + 实现类。接口命名 `XxxService`，实现类 `XxxServiceImpl`。
 
-**目录分离：** 接口放在模块包根路径下，实现类放在 `impl/` 子包中，禁止接口和实现混在同一目录。
+接口放在模块包根路径下，实现类放在 `impl/` 子包中，禁止混在同一目录：
 
 ```
-com.ws.brain.{module}/
+com.example.{module}/
 ├── XxxService.java           ← 接口
 └── impl/
     └── XxxServiceImpl.java   ← 实现类
@@ -84,59 +74,48 @@ com.ws.brain.{module}/
 
 ## 六、异常处理
 
-- 业务异常：`BrainException(String message)` / `BrainException(String message, Throwable cause)`
-- Service 层抛 `BrainException`，Orchestrator 层统一 catch 并记日志
+- 业务异常统一用项目自定义异常（如 `BusinessException`）
+- Service 层抛业务异常，上层统一 catch 并记日志
 - 禁止空 catch 块，至少 `log.warn()` + 注释说明
+- 与 always-apply.md 第 2 条配合：Controller/Service 不 try-catch 包装返回值，异常交给 @RestControllerAdvice
 
 ## 七、数据库与 MyBatis
 
-- DB snake_case → Java camelCase（MyBatis 已开启自动映射）
-- Mapper 接口：`com.ws.brain.repository.mapper`
-- XML：`src/main/resources/mapper/`，namespace = 接口全路径
+- DB snake_case → Java camelCase（MyBatis 自动映射）
+- XML 中 namespace = Mapper 接口全路径
 - 禁止 XML 中 `${}` 拼接 SQL，查询参数一律 `#{}`
 
 ## 八、配置管理
 
-- 业务配置前缀：`brain.*`
-- 敏感信息通过环境变量：`${DEEPSEEK_API_KEY:}`
 - 禁止硬编码路径、URL、密钥
+- 敏感信息通过环境变量注入
+- 业务配置统一前缀，通过 `@ConfigurationProperties` 读取
 
-## 九、项目特有约定
+## 九、注释规范
 
-1. 文件监控目录：`~/brain-inbox/`（配置读取，不硬编码）
-2. Obsidian Vault 路径：`~/obsidian-vault/`（配置读取）
-3. LLM 原始响应必须持久化到 `ai_execution_log` 表
-4. Pipeline 任务失败不自动重调 LLM，标记 FAILED 等待人工处理
-5. 规则预筛选是纯 Java 逻辑，不涉及 LLM
-6. 知识提取 → Obsidian 写入之间必须有 `knowledge_candidate` 中间层
-
-## 十、注释规范（项目补充）
-
-在阿里规约基础上，项目额外要求：
-- 每个 Java 文件必须有类注释（`@author Kevin`、`@since`）
+在阿里规约基础上额外要求：
+- 每个 Java 文件必须有类注释（`@author`、`@since`）
 - 所有 private 方法必须有注释，说明职责、参数含义、返回值
 - 每次调用 private 方法前必须有一行注释说明调用意图
 - Entity/DTO 每个字段必须有注释
 - 复杂判断（超过 2 个条件）、正则、非显而易见的业务规则，必须加行内注释
 - getter/setter（Lombok 生成）、简单注入声明、一目了然的赋值不需要注释
 
-## 十一、方法规范
+## 十、方法规范
 
 - 入参必须做 null 和边界检查
 - 单方法不超过 30 行，单一职责
 - 禁止魔数，用常量或枚举
 - `if`/`for`/`while` 必须用花括号
 
-## 十二、Import 规范
+## 十一、Import 规范
 
-- 禁止使用通配符 `import xxx.*`（阿里规约已有）
-- **删除某段代码时，必须同步删除该代码引入但已不再使用的 import 语句**
-- 生成或修改代码完成后，检查 IDE 无 `unused import` 警告
+- 禁止通配符 `import xxx.*`
+- 删除代码时必须同步删除已不再使用的 import 语句
 - 禁止保留仅用于注释代码的 import
+- 生成或修改代码完成后，确保无 unused import 警告
 
-## 十三、禁止项总览
-
-以下为项目特有的禁止项（阿里规约覆盖的不再重复列出）：
+## 十二、禁止项总览
 
 | 禁止 | 替代方案 |
 |------|----------|
@@ -153,3 +132,7 @@ com.ws.brain.{module}/
 | 方法超过 30 行 | 拆分 |
 | 通配符 import `*` | 明确导入单个类 |
 | 删除代码后保留无用 import | 同步删除对应 import |
+| `BeanUtils.copyProperties()` | MapStruct Convert |
+| `@Autowired` 字段注入 | 构造函数注入 @RequiredArgsConstructor |
+| `Date` / `SimpleDateFormat` | `LocalDateTime` |
+| `System.out` / `e.printStackTrace()` | SLF4J @Slf4j |
