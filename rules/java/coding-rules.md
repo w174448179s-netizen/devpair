@@ -1,11 +1,11 @@
 # Java 编码规范
 
-> always-apply.md 的 5 条铁律在此文件中展开细化。两者不冲突，互为补充。
+> always-apply.md 是 5 条铁律，本文件是展开细则。两者共同构成完整编码标准。
 
 ## 总则
 
 1. 代码基准规范：严格执行《阿里巴巴Java开发手册（泰山版）》全部强制条款
-2. 本文件为项目扩展规则，**当与阿里规约冲突时，以本文件为准**
+2. 本文件为扩展规则，**当与阿里规约冲突时，以本文件为准**
 3. 生成、修改、重构 Java 代码均不得违反上述两套规范
 
 ### 阿里规约关键强制点
@@ -14,10 +14,8 @@
 2. 空指针防护：所有对象调用前判空，集合返回空集合而非 null，字符串用 hasText()
 3. 日期时间：禁用 Date / SimpleDateFormat，统一 LocalDateTime
 4. equals：常量对象调用 equals，避免空指针
-5. 依赖注入：禁用 @Autowired 字段注入，统一构造函数注入，使用 @RequiredArgsConstructor
-6. 日志：使用 SLF4J（Lombok @Slf4j），禁止 System.out / e.printStackTrace()
-7. SQL：禁止 select *，禁止 order by 数字，避免索引失效
-8. 注释：类、公共方法必须 JavaDoc，复杂逻辑行内注释
+5. 日志：使用 SLF4J（Lombok @Slf4j），禁止 System.out / e.printStackTrace()
+6. SQL：禁止 select *，禁止 order by 数字，避免索引失效
 
 ---
 
@@ -31,16 +29,13 @@
 
 | 层 | 命名规则 | 说明 |
 |---|---|---|
-| DO | `{表名驼峰}`，不加后缀 | 对应数据库表，不暴露给外部 |
+| DO | `{表名驼峰}`，不加后缀 | 对应数据库表 |
 | DTO | `{业务含义}DTO` | Service 间传递，按业务场景聚合 |
 | Req | `{动作}{对象}Req` | 接口入参 |
 | VO | `{对象}VO` | 接口出参 |
 | Convert | `{实体名}Convert` | MapStruct 转换器 |
 
-规则：
 - DO 不加后缀，DTO/Req/VO 必须加后缀
-- 禁止 DO 直接跨 Service 传递，必须先转 DTO
-- 禁止 DO 直接返回给调用方
 - 对象转换统一用 MapStruct，禁止 `BeanUtils.copyProperties()` 等反射拷贝
 
 ## 三、状态管理
@@ -77,7 +72,6 @@ com.example.{module}/
 - 业务异常统一用项目自定义异常（如 `BusinessException`）
 - Service 层抛业务异常，上层统一 catch 并记日志
 - 禁止空 catch 块，至少 `log.warn()` + 注释说明
-- 与 always-apply.md 第 2 条配合：Controller/Service 不 try-catch 包装返回值，异常交给 @RestControllerAdvice
 
 ## 七、数据库与 MyBatis
 
@@ -93,8 +87,6 @@ com.example.{module}/
 
 ## 九、注释规范
 
-在阿里规约基础上额外要求：
-- 每个 Java 文件必须有类注释（`@author`、`@since`）
 - 所有 private 方法必须有注释，说明职责、参数含义、返回值
 - 每次调用 private 方法前必须有一行注释说明调用意图
 - Entity/DTO 每个字段必须有注释
@@ -115,7 +107,9 @@ com.example.{module}/
 - 禁止保留仅用于注释代码的 import
 - 生成或修改代码完成后，确保无 unused import 警告
 
-## 十二、禁止项总览
+## 十二、禁止项速查
+
+> 仅列出 always-apply.md 5 条铁律之外的禁止项。
 
 | 禁止 | 替代方案 |
 |------|----------|
@@ -133,6 +127,5 @@ com.example.{module}/
 | 通配符 import `*` | 明确导入单个类 |
 | 删除代码后保留无用 import | 同步删除对应 import |
 | `BeanUtils.copyProperties()` | MapStruct Convert |
-| `@Autowired` 字段注入 | 构造函数注入 @RequiredArgsConstructor |
 | `Date` / `SimpleDateFormat` | `LocalDateTime` |
 | `System.out` / `e.printStackTrace()` | SLF4J @Slf4j |
