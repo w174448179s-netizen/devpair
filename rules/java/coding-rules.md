@@ -55,7 +55,35 @@
 - 多行文本：Text Blocks `"""`，禁止字符串拼接
 - 流式操作：多步过滤/映射/分组用 Stream API；单步简单循环用 for-each
 
-## 五、Service 分层
+## 五、依赖注入
+
+- 禁止手写构造函数，统一用 `@RequiredArgsConstructor`（Lombok 生成构造函数）
+- 禁止 `@Autowired` 字段注入，必须构造函数注入（`@RequiredArgsConstructor` 自动实现）
+- 需要注入的依赖声明为 `private final`，`@RequiredArgsConstructor` 仅为 final 字段生成构造函数
+- Spring 配置类（`@Configuration`）中的 `@Bean` 方法例外，不适用此规则
+
+```java
+// 正确
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+    private final UserMapper userMapper;
+    private final UserConvert userConvert;
+}
+
+// 禁止
+@Service
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserMapper userMapper;  // 禁止字段注入
+
+    public UserServiceImpl(UserMapper userMapper) {  // 禁止手写构造函数
+        this.userMapper = userMapper;
+    }
+}
+```
+
+## 六、Service 分层
 
 每个 Service 必须有接口 + 实现类。接口命名 `XxxService`，实现类 `XxxServiceImpl`。
 
@@ -68,20 +96,20 @@ com.example.{module}/
     └── XxxServiceImpl.java   ← 实现类
 ```
 
-## 六、异常处理
+## 七、异常处理
 
 - 业务异常统一用项目自定义异常（如 `BusinessException`）
 - Service 层抛业务异常，上层统一 catch 并记日志
 - 禁止空 catch 块，至少 `log.warn()` + 注释说明
 
-## 七、数据库与 MyBatis
+## 八、数据库与 MyBatis
 
 - DB snake_case → Java camelCase（MyBatis 自动映射）
 - XML 中 namespace = Mapper 接口全路径
 - 禁止 XML 中 `${}` 拼接 SQL，查询参数一律 `#{}`
 - 数据库连接池必须有超时配置
 
-## 八、配置管理
+## 九、配置管理
 
 - 禁止硬编码路径、URL、密钥
 - 敏感信息通过环境变量注入
@@ -89,12 +117,12 @@ com.example.{module}/
 - `application.yml` 必须有密码配置（即使为空也要占位）
 - 日志级别不能是 DEBUG
 
-## 九、Web 安全
+## 十、Web 安全
 
 - CORS 必须限制来源，禁止 `allowAllOrigins`
 - HTTP 客户端通过 `@Bean` 单例注入，禁止方法内 `new`
 
-## 十、注释规范
+## 十一、注释规范
 
 - 所有 private 方法必须有注释，说明职责、参数含义、返回值
 - 每次调用 private 方法前必须有一行注释说明调用意图
@@ -102,21 +130,21 @@ com.example.{module}/
 - 复杂判断（超过 2 个条件）、正则、非显而易见的业务规则，必须加行内注释
 - getter/setter（Lombok 生成）、简单注入声明、一目了然的赋值不需要注释
 
-## 十一、方法规范
+## 十二、方法规范
 
 - 入参必须做 null 和边界检查
 - 单方法不超过 30 行，单一职责
 - 禁止魔数，用常量或枚举
 - `if`/`for`/`while` 必须用花括号
 
-## 十二、Import 规范
+## 十三、Import 规范
 
 - 禁止通配符 `import xxx.*`
 - 删除代码时必须同步删除已不再使用的 import 语句
 - 禁止保留仅用于注释代码的 import
 - 生成或修改代码完成后，确保无 unused import 警告
 
-## 十三、禁止项速查
+## 十四、禁止项速查
 
 > 仅列出 always-apply.md 5 条铁律之外的禁止项。
 
@@ -142,3 +170,4 @@ com.example.{module}/
 | 方法内 `new` HTTP 客户端 | `@Bean` 单例注入 |
 | DTO setter 链 | `@Builder` 模式 |
 | 日志级别 DEBUG | INFO 或以上 |
+| 手写构造函数 | `@RequiredArgsConstructor` |
