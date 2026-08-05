@@ -108,6 +108,7 @@ com.example.{module}/
 - XML 中 namespace = Mapper 接口全路径
 - 禁止 XML 中 `${}` 拼接 SQL，查询参数一律 `#{}`
 - 数据库连接池必须有超时配置
+- PostgreSQL JSONB 字段：MyBatis XML 中写入和查询必须显式类型转换 `#{metadata}::jsonb`，否则报类型不匹配错误
 
 ## 九、配置管理
 

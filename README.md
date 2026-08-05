@@ -132,7 +132,7 @@ your-project/
 ```
 架构讨论（跟 AI 对话，敲定 v1 范围）
     ↓
-对 AI 说：「读取 ~/devpair/commands/split-tasks.md，按指令执行」
+对 AI 说：「根据目录下文档，读取 ~/devpair/commands/split-tasks.md，按指令执行」
     → AI 生成 tasks/overview.md + task-xx.md
     ↓
 对 AI 说：「读取 ./tasks/task-02-xxx.md，按文档要求执行」
