@@ -24,7 +24,7 @@ prompt 中必须明确告知 LLM 输出格式要求：
 请从文本中提取实体信息，以结构化格式返回。
 ```
 
-## 二、输入侧预处理（防患于未然）
+## 二、输入侧预处理（降低概率，非万能）
 
 传入 LLM 的文档内容可能包含 `"`、`\` 等 JSON 特殊字符。LLM 不是 JSON 序列化器，不能依赖它在输出时正确转义。
 
@@ -41,15 +41,18 @@ public static String sanitizeForLlm(String raw) {
     if (raw == null) {
         return "";
     }
-    // 将英文双引号替换为中文书名号，不破坏阅读体验，从源头消除转义风险
+    // 将英文双引号替换为中文引号，降低 LLM 输出未转义引号的概率
     return raw.replace("\"", "「")
               .replace("\"", "」");
 }
 ```
 
-- **优先在输入侧解决**，不依赖 LLM 的转义能力
-- 替换为中文引号不影响 LLM 对内容的语义理解
-- 如果必须保留原始引号，则用 `\"` 转义，但不如替换可靠
+**注意：输入侧替换不是万能的。** LLM 可能在处理过程中将 `「」` 又转回 `"`，导致输出 JSON 中仍出现未转义引号。因此：
+
+- 输入侧预处理只是**第一道防线**，降低出错概率
+- **必须配合输出侧兜底**（见第四章修复重试规则）
+- prompt 中补充指令：`"不要修改内容中的引号格式，保持原样输出"`
+- **最可靠的方案是避免在 JSON 中放原始文档内容**——用提取结果（枚举、布尔、数字）代替原文
 
 ## 三、LLM 输出必须预清理
 
@@ -61,7 +64,7 @@ LLM 输出不可信，解析前必须做预清理。不同模型有不同行为�
 | DeepSeek | 偶尔在 JSON 前后加解释文字 | 提取首个 `{` 到末尾 `}` 的子串 |
 | Ollama | 通常干净，但偶有多余换行 | trim + 去除首尾空白 |
 | 通用兜底 | BOM 头、零宽字符 | 去除 BOM、不可见字符 |
-| 内容引号未转义 | 文档内容中的 `"` 进入 JSON 字符串值未转义 | 输入侧预处理（见第二章）+ prompt 要求转义 |
+| 内容引号未转义 | 文档内容中的 `"` 或 LLM 将 `「」` 转回 `"` 进入 JSON 字符串值未转义 | 输入侧预处理 + 输出侧 `escapeInnerQuotes` 修复 |
 
 ### 预清理工具类
 
@@ -136,6 +139,80 @@ LLM 原始输出
 | 缺失闭合括号 | 自动补全 `}` 或 `]` |
 | 单引号包裹字符串 | 替换为双引号 |
 | key 未加引号 | 正则补引号 |
+| 字符串值内未转义的 `"` | 逐字符扫描，区分结构引号和内容引号，内容引号补 `\` 转义 |
+
+**未转义引号修复思路**（最复杂的场景）：
+
+```java
+/**
+ * 尝试修复 JSON 字符串值内未转义的双引号。
+ * 原理：逐字符扫描，在字符串值内部遇到的 " 如果后面不是 JSON 结构字符
+ *       （, } ] : 或换行+key），则判定为内容引号，补 \ 转义。
+ *
+ * @param json 清理后的 JSON 字符串
+ * @return 修复后的 JSON 字符串
+ */
+public static String escapeInnerQuotes(String json) {
+    StringBuilder sb = new StringBuilder();
+    boolean inString = false;
+    boolean escaped = false;
+
+    for (int i = 0; i < json.length(); i++) {
+        char c = json.charAt(i);
+
+        if (escaped) {
+            sb.append(c);
+            escaped = false;
+            continue;
+        }
+
+        if (c == '\\') {
+            sb.append(c);
+            escaped = true;
+            continue;
+        }
+
+        if (c == '"') {
+            if (!inString) {
+                // 字符串开始
+                inString = true;
+                sb.append(c);
+            } else {
+                // 在字符串内遇到 "，判断是结束还是内容
+                // 向后看，跳过空白，下一个有效字符是否是 JSON 结构字符
+                int j = i + 1;
+                while (j < json.length() && Character.isWhitespace(json.charAt(j))) {
+                    j++;
+                }
+                char next = j < json.length() ? json.charAt(j) : '\0';
+
+                if (next == ',' || next == '}' || next == ']' || next == ':') {
+                    // 字符串结束
+                    inString = false;
+                    sb.append(c);
+                } else {
+                    // 内容引号，转义
+                    sb.append("\\\"");
+
+                    // 特殊处理：如果后面紧跟的是另一个 "（如 "" 配对），
+                    // 跳过它避免重复转义
+                    if (next == '"') {
+                        i = j;
+                    }
+                }
+            }
+        } else {
+            sb.append(c);
+        }
+    }
+
+    return sb.toString();
+}
+```
+
+- 该方法作为第 3 层修复的最后手段，仅在预清理 + 常规修复都失败后调用
+- 不保证 100% 正确，复杂的嵌套引号场景可能误判
+- 修复后仍解析失败，抛异常 + 记录 rawResponse
 
 - 修复重试只做一次，不做无限循环修复
 - 修复后仍解析失败，抛 `BusinessException`，**不静默吞错**
