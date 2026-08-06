@@ -5,6 +5,8 @@
 - 嵌入模型：优先使用本地 Ollama 部署（如 nomic-embed-text），离线场景保底
 - 备用方案：DeepSeek Embedding API（需联网）
 - 文本分块大小：500-1000 字符，按段落边界切分，保留上下文重叠 100 字符
+- 分块偏移统一为字节偏移，禁止字符偏移与字节偏移混用（详见踩坑记录 text-chunking.md）
+- 切分降级链：段落边界 → 句子边界 → 固定窗口硬切分，禁止跳过句子边界直接硬切
 
 ## 存储
 
@@ -27,4 +29,5 @@
 
 ## 相关踩坑记录
 
-详见 ~/devpair/notes/pitfalls/pgvector.md
+- 详见 ~/devpair/notes/pitfalls/pgvector.md
+- 详见 ~/devpair/notes/pitfalls/text-chunking.md — 字符/字节偏移错位、固定窗口不尊重句子边界

@@ -77,7 +77,8 @@ DevPair 不是知识库，不是 Wiki，不是第二大脑。
 │       ├── spring-ai.md                    # ChatClient 连接池问题
 │       ├── agent-design.md                 # Agent 工具接口过度设计
 │       ├── pgvector.md                     # PgVector 配置踩坑
-│       └── llm-json-output.md              # 智谱 GLM JSON 输出带 markdown 包裹
+│       ├── llm-json-output.md              # LLM JSON 输出问题（markdown 包裹 + 引号未转义）
+│       └── text-chunking.md                # 文本分块问题（字符/字节偏移错位 + 句子边界）
 │
 ├── templates/                              # 任务模板（待填充）
 │
