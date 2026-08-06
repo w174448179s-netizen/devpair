@@ -24,7 +24,34 @@ prompt 中必须明确告知 LLM 输出格式要求：
 请从文本中提取实体信息，以结构化格式返回。
 ```
 
-## 二、LLM 输出必须预清理
+## 二、输入侧预处理（防患于未然）
+
+传入 LLM 的文档内容可能包含 `"`、`\` 等 JSON 特殊字符。LLM 不是 JSON 序列化器，不能依赖它在输出时正确转义。
+
+**传入 LLM 前，对文档内容做预处理：**
+
+```java
+/**
+ * 对传入 LLM 的文本做安全预处理，消除 JSON 特殊字符隐患。
+ *
+ * @param raw 原始文档内容
+ * @return 安全内容，可直接放入 LLM prompt
+ */
+public static String sanitizeForLlm(String raw) {
+    if (raw == null) {
+        return "";
+    }
+    // 将英文双引号替换为中文书名号，不破坏阅读体验，从源头消除转义风险
+    return raw.replace("\"", "「")
+              .replace("\"", "」");
+}
+```
+
+- **优先在输入侧解决**，不依赖 LLM 的转义能力
+- 替换为中文引号不影响 LLM 对内容的语义理解
+- 如果必须保留原始引号，则用 `\"` 转义，但不如替换可靠
+
+## 三、LLM 输出必须预清理
 
 LLM 输出不可信，解析前必须做预清理。不同模型有不同行为：
 
@@ -34,6 +61,7 @@ LLM 输出不可信，解析前必须做预清理。不同模型有不同行为�
 | DeepSeek | 偶尔在 JSON 前后加解释文字 | 提取首个 `{` 到末尾 `}` 的子串 |
 | Ollama | 通常干净，但偶有多余换行 | trim + 去除首尾空白 |
 | 通用兜底 | BOM 头、零宽字符 | 去除 BOM、不可见字符 |
+| 内容引号未转义 | 文档内容中的 `"` 进入 JSON 字符串值未转义 | 输入侧预处理（见第二章）+ prompt 要求转义 |
 
 ### 预清理工具类
 
@@ -86,7 +114,7 @@ public final class LlmOutputCleaner {
 - 预清理在解析前执行，**不作为错误处理**，是标准流程的一部分
 - 新发现的模型输出行为，更新本表格和清理逻辑
 
-## 三、解析失败的三层处理
+## 四、解析失败的三层处理
 
 ```
 LLM 原始输出
@@ -113,7 +141,7 @@ LLM 原始输出
 - 修复后仍解析失败，抛 `BusinessException`，**不静默吞错**
 - rawResponse 完整存入日志（`ai_execution_log` 或 SLF4J），方便排查
 
-## 四、优先使用 Structured Output
+## 五、优先使用 Structured Output
 
 LangChain4j 的 Structured Output 能自动处理序列化，但仍需预清理：
 
@@ -137,11 +165,12 @@ if (result == null) {
 - Structured Output 是首选，但不盲目信任框架的反序列化
 - 框架反序列化失败时，走预清理 + 手动解析兜底
 
-## 五、禁止项
+## 六、禁止项
 
 | 禁止 | 替代方案 |
 |------|----------|
 | 直接解析 LLM 原始输出，不做预清理 | 先 `LlmOutputCleaner.cleanJson()` 再解析 |
+| 传入 LLM 的文档内容不做预处理 | 先 `sanitizeForLlm()` 替换引号等特殊字符 |
 | prompt 不说明输出格式 | 显式约束 JSON 结构 + 示例 |
 | 解析失败直接吞错返回 null | 抛异常 + 记录 rawResponse |
 | 修复重试无限循环 | 最多一次修复重试 |
@@ -150,4 +179,4 @@ if (result == null) {
 
 ## 相关踩坑记录
 
-- `~/devpair/notes/pitfalls/llm-json-output.md` — 智谱 GLM JSON 输出带 markdown 包裹
+- `~/devpair/notes/pitfalls/llm-json-output.md` — 智谱 GLM JSON 输出带 markdown 包裹 + 文档内容引号导致 JSON 解析失败
